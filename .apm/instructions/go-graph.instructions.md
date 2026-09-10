@@ -12,15 +12,15 @@ it as the repo map before searching raw files. Use `gograph query` and
 `gograph callers` for symbol lookup.
 
 ━━━ READ FIRST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-This repository contains an llm-wiki/ directory with curated context pages.
-Read them BEFORE writing any code or running any analysis:
+If this repository has an llm-wiki/ directory with curated context pages,
+read them BEFORE writing any code or running any analysis:
 
   llm-wiki/README.md        → index of all wiki pages
   llm-wiki/project.md       → project identity, non-goals, correctness model
   llm-wiki/rules.md         → binding rules (git, build, testing, architecture)
   llm-wiki/agent-contract.md → session lifecycle and tool selection contract
 
-If generated pages are missing: gograph build . --precise && gograph wiki
+To generate them (or refresh a stale set): gograph build . --precise && gograph wiki
 
 ━━━ PREREQUISITE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ALL query commands read from .gograph/graph.json. If it does not exist, every

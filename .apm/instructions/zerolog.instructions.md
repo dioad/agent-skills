@@ -320,7 +320,7 @@ Use these names consistently across all codebases:
 
 | Field | Type | Set by | Meaning |
 |-------|------|--------|---------|
-| `service` | `string` | Application entry point (`Exec`) | Process-wide label identifying the service (e.g. `eventbroker`). Set once via `DefaultContextLogger` and root context injection so every log event carries it. |
+| `service` | `string` | Application entry point (`Exec`) | Process-wide label identifying the service (e.g. `api`, `billing`). Set once via `DefaultContextLogger` and root context injection so every log event carries it. |
 | `component` | `string` | Component constructor (e.g. `NewManager`) | Subsystem label injected into a long-lived sub-context (e.g. `webhook`, `sse`, `cors`). Inherited by all goroutines spawned from that context. |
 | `request_id` | `string` | Request-ID middleware | Unique ID per HTTP request |
 | `auth_source` | `string` | Auth middleware | Which auth mechanism validated the request (`oidc_session`, `jwt`, `basic`, `github`, `hmac`) |
@@ -329,8 +329,9 @@ Use these names consistently across all codebases:
 ## Avoid Duplicate Fields Across Layers
 
 Before adding a field with `Str`/`Bool`/`Int` or via `UpdateContext`, check
-whether a downstream dependency (`dioad/net`, `dioad/auth`, `dioad/cli`) or an
-upstream middleware in this same request chain already attaches it. Fields
+whether a shared library the service depends on (for example a common
+networking, auth, or logging module) or an upstream middleware in this same
+request chain already attaches it. Fields
 like `principal` and `auth_source` are frequently added once by a shared
 middleware; re-adding them locally either duplicates the field in every log
 line or, worse, silently shadows the shared value with a locally-computed one

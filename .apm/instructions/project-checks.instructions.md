@@ -1,5 +1,5 @@
 ---
-description: 'Required pre-completion checks and PR review workflow for dioad projects'
+description: 'Required pre-completion checks and PR review workflow for a Go project'
 applyTo: "**"
 ---
 
