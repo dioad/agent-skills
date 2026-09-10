@@ -1,0 +1,18 @@
+name: agent-skills
+version: 1.0.0
+description: >
+  Shared agent skills, commands, and instructions for dioad Go projects,
+  distributed as an APM package. Install with `apm install github.com/dioad/agent-skills`
+  or copy a skill directory straight into a project's (or ~/) .claude/skills/.
+author: Pat Downey
+# Which agent platforms to deploy to.
+# Resolution order: --target flag > this field > auto-detect from filesystem.
+# Accepted values: copilot, claude, cursor, opencode, codex, gemini, windsurf, all
+targets:
+- claude
+- copilot
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
+scripts: {}
