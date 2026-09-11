@@ -78,6 +78,6 @@ This commit addresses {N} unresolved review comments:
 
 1. {Comment title} (line {X} of {file}.go)
    - {Description of fix}
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
+
+See `git-workflow.instructions.md` for the attribution-trailer convention.
