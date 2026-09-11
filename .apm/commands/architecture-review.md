@@ -21,7 +21,7 @@ it.
 Review the codebase across eight lenses — Good Engineering Practices,
 Correctness, Operability, Documentation, Security, Hexagonal Architecture, Low
 Coupling/Complexity, and Beta-Release Readiness — and write open findings to
-`<docdir>/claude-review-architecture.md` (`doc/` or `docs/`, created if absent).
+`doc/claude-review-architecture.md` (create `doc/` if absent).
 
 Each finding records file(s), dimension(s), a description, a concrete fix, and a
 High/Medium/Low priority. Report back the total count and the top three
@@ -31,7 +31,7 @@ High-priority items.
 
 ## Phase 2: Address (`architecture-review address [High|Medium|Low]`)
 
-Work `<docdir>/claude-review-architecture.md` in priority order (or only the
+Work `doc/claude-review-architecture.md` in priority order (or only the
 priority named in the argument), one conventional commit per finding — with the
 sole exception of a finding needing a structural refactor, which splits into a
 zero-behavior extraction commit plus a behavior-change commit under the
@@ -41,5 +41,5 @@ Per finding: baseline `gocognit <file>`, make the minimal fix, run the target
 repo's pre-completion checks (`make verify` or its `project-checks` sequence),
 re-check `gocognit` (complexity must not rise unless the readable form requires
 it), commit `fix: <finding title>`, then move the finding to
-`<docdir>/claude-review-architecture-resolved.md` with its commit SHA and
+`doc/claude-review-architecture-resolved.md` with its commit SHA and
 complexity delta. Do not push.

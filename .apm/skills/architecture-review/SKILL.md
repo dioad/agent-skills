@@ -38,15 +38,16 @@ findings from an existing one?"
 
 ## Document locations
 
-Architecture review documents live in the project's documentation directory:
-
-- If a `doc/` or `docs/` directory exists, use it.
-- Otherwise, create `doc/` and use that.
+Architecture review documents live in the project's `doc/` directory (create
+it if it doesn't exist yet). This is the fixed convention across this
+package's skills — `test-quality` writes its findings to `doc/` too, with no
+`docs/` fallback — so pick `doc/` even if the project already has a `docs/`
+directory.
 
 The two files are:
 
-- **`<docdir>/claude-review-architecture.md`** — open (unresolved) findings.
-- **`<docdir>/claude-review-architecture-resolved.md`** — resolved findings,
+- **`doc/claude-review-architecture.md`** — open (unresolved) findings.
+- **`doc/claude-review-architecture-resolved.md`** — resolved findings,
   with commit SHA and outcome for each.
 
 ---
@@ -54,7 +55,7 @@ The two files are:
 ## Phase 1: Generate Review
 
 Perform a comprehensive architecture and engineering review of the current
-codebase and write open findings to `<docdir>/claude-review-architecture.md`.
+codebase and write open findings to `doc/claude-review-architecture.md`.
 
 ### Review dimensions
 
@@ -94,14 +95,14 @@ Analyse the codebase across these eight lenses:
    - A clear description of the problem
    - A concrete recommended fix
    - A priority rating: **High**, **Medium**, or **Low**
-3. Write all findings to `<docdir>/claude-review-architecture.md` using the
+3. Write all findings to `doc/claude-review-architecture.md` using the
    output format below.
 4. After writing, report the total finding count and top three High-priority
    items to the user.
 
 ### Output format
 
-Write `<docdir>/claude-review-architecture.md` with this structure:
+Write `doc/claude-review-architecture.md` with this structure:
 
 ```
 # Architecture Review: `<module-path>`
@@ -146,12 +147,13 @@ _Reviewed: YYYY-MM-DD — branch `<branch>` (<commit-sha>)_
 
 ## Phase 2: Address Findings
 
-Work through findings in `<docdir>/claude-review-architecture.md` one at a
+Work through findings in `doc/claude-review-architecture.md` one at a
 time. Each finding gets exactly one conventional commit — except a finding
 that requires a structural refactor (splitting a type, extracting an
 interface, moving a package), which follows the phased-refactor pattern
-instead: a zero-behavior-change extraction commit, then a behavior-change
-commit, both addressing the same finding.
+instead (see `phased-refactor.instructions.md`, distributed alongside this
+skill, for the full methodology): a zero-behavior-change extraction commit,
+then a behavior-change commit, both addressing the same finding.
 
 ### Scope
 
@@ -184,8 +186,9 @@ For each finding:
 
 4. **Verify** -- run the target repo's own pre-completion checks before
    committing. Prefer `make verify` if the repo has that target; otherwise
-   follow the repo's `project-checks` rule. If neither is available, run this
-   baseline in order and require every step to pass:
+   follow the repo's `project-checks` rule (see `project-checks.instructions.md`,
+   distributed alongside this skill, if the target repo carries it). If neither
+   is available, run this baseline in order and require every step to pass:
    ```bash
    go generate ./...   # only if the repo uses code generation
    go build ./...       # go build . for a single-binary repo with only a root main
@@ -220,9 +223,9 @@ For each finding:
 
 7. **Update documents** -- move the finding from the open file to the
    resolved file:
-   - Remove it from `<docdir>/claude-review-architecture.md` and update the
+   - Remove it from `doc/claude-review-architecture.md` and update the
      Priority Table.
-   - Append it to `<docdir>/claude-review-architecture-resolved.md` in the
+   - Append it to `doc/claude-review-architecture-resolved.md` in the
      resolved format:
      ```
      ### N. <Finding Title> ✅ Resolved
