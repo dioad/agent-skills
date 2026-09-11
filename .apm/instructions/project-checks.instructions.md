@@ -35,7 +35,11 @@ When there is no `make verify`, run these in order. All must succeed:
 6. **`staticcheck ./...`** — must report no issues, *if the repo already uses it*
    (install: `go install honnef.co/go/tools/cmd/staticcheck@latest`).
 7. **`go test -race ./...`** — all tests must pass with no data races.
-8. **`shellcheck -o all <script.sh>`** — every shell script in the repo must pass.
+8. **`shellcheck -o all <script.sh>`** — every shell script in the repo must
+   pass. Enumerate them first, e.g.:
+   ```bash
+   find . -name '*.sh' -not -path '*/vendor/*' -not -path '*/node_modules/*' -exec shellcheck -o all {} +
+   ```
 
 # PR Review Workflow
 
@@ -78,6 +82,6 @@ This commit addresses {N} unresolved review comments:
 
 1. {Comment title} (line {X} of {file}.go)
    - {Description of fix}
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ```
+
+See `git-workflow.instructions.md` for the attribution-trailer convention.
