@@ -25,7 +25,8 @@ _(commands: [`architecture-review`](.apm/prompts/architecture-review.prompt.md),
   instructions/<name>.instructions.md  shared rules (compiled into AGENTS.md / .claude/rules/)
 .claude/
   skills/<name>/                    committed mirror of .apm/skills/<name>/ — see `make sync`
-apm.yml                            APM manifest (targets: claude, copilot)
+apm.yml                            APM manifest (targets: claude, copilot; also declares
+                                    `scripts:` — see Scripts below)
 Makefile                           list / sync / check / lint
 ```
 
@@ -66,6 +67,18 @@ cp -r .claude/skills/test-quality  ~/.claude/skills/                    # user-s
    `git rev-parse --show-toplevel`, not a hardcoded `.claude/...` path.
 4. `make sync && make check && make lint`.
 5. Add a row to the table above.
+
+## Scripts
+
+`apm.yml` declares one script, run on demand with `apm run <name>` — not
+automatically on `apm install` (APM has no postinstall hook):
+
+- **`gograph-setup`** — runs `gograph add-claude-plugin` in the consuming
+  repo. Requires the `gograph` CLI on `PATH` (`brew install
+  ozgurcd/homebrew-tap/gograph`). Installs gograph's own CLAUDE.md steering
+  rules, MCP registration prompt, and PreToolUse hook, generated live by the
+  tool's current version — so there is no hand-copied gograph reference in
+  this package to go stale.
 
 ## Per-skill requirements
 

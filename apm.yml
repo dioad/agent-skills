@@ -15,4 +15,12 @@ dependencies:
   apm: []
   mcp: []
 includes: auto
-scripts: {}
+scripts:
+  # Requires the gograph CLI on PATH (`brew install ozgurcd/homebrew-tap/gograph`,
+  # https://github.com/ozgurcd/homebrew-tap). Not run automatically by `apm install` -- APM has no
+  # postinstall hook -- so a consuming repo that wants gograph's steering rules
+  # runs this once itself: `apm run gograph-setup`. It installs gograph's own
+  # CLAUDE.md rules, MCP registration prompt, and PreToolUse hook directly into
+  # that repo, generated live by the tool's current version -- so there is
+  # nothing here for us to keep in sync by hand.
+  gograph-setup: gograph add-claude-plugin
