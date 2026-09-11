@@ -8,9 +8,10 @@ works standalone — copy its directory into any `.claude/skills/`.
 
 | Skill | What it does |
 |---|---|
+| [`architecture-review`](.apm/skills/architecture-review/SKILL.md) | Review the codebase across eight lenses (good engineering practices, correctness, operability, documentation, security, hexagonal architecture, low coupling/complexity, beta-release readiness); emit a ranked findings document, then work through it one conventional commit at a time with a complexity round-trip on each fix. |
 | [`test-quality`](.apm/skills/test-quality/SKILL.md) | Measure Go test-suite strength (mutation testing via `gomutants` + per-test coverage-contribution analysis); emit a quantitative scorecard, a test contribution map, and ranked LLM-actionable findings, then work them one commit at a time. |
 
-_(commands: [`test-quality`](.apm/commands/test-quality.md))_
+_(commands: [`architecture-review`](.apm/commands/architecture-review.md), [`test-quality`](.apm/commands/test-quality.md))_
 
 ## Layout
 
@@ -65,5 +66,8 @@ cp -r .claude/skills/test-quality  ~/.claude/skills/                    # user-s
 
 ## Per-skill requirements
 
+- **architecture-review** — `gocognit` on `PATH` (complexity baseline/round-trip
+  in Phase 2); `gh` for filing out-of-scope findings upstream. Phase 1 needs no
+  tooling.
 - **test-quality** — `go`, `python3` (3.11+), and `gomutants` on `PATH`;
   `gocognit` optional (adds the risk section).
