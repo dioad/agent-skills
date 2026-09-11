@@ -35,19 +35,11 @@ Follow idiomatic Go practices and community standards when writing Go code. Thes
 - Package names should be singular, not plural
 
 #### Package Declaration Rules (CRITICAL):
-- **NEVER duplicate `package` declarations** - each Go file must have exactly ONE `package` line
-- When editing an existing `.go` file:
-  - **PRESERVE** the existing `package` declaration - do not add another one
-  - If you need to replace the entire file content, start with the existing package name
-- When creating a new `.go` file:
-  - **BEFORE writing any code**, check what package name other `.go` files in the same directory use
-  - Use the SAME package name as existing files in that directory
-  - If it's a new directory, use the directory name as the package name
-  - Write **exactly one** `package <name>` line at the very top of the file
-- When using file creation or replacement tools:
-  - **ALWAYS verify** the target file doesn't already have a `package` declaration before adding one
-  - If replacing file content, include only ONE `package` declaration in the new content
-  - **NEVER** create files with multiple `package` lines or duplicate declarations
+- Each Go file must have exactly ONE `package` line. Before writing or
+  replacing a file's content, check what package name the other `.go` files
+  in the same directory already use (or the directory name, for a new
+  directory) and reuse it — never add a second `package` declaration to a
+  file that already has one.
 
 ### Variables and Functions
 
@@ -278,27 +270,9 @@ Follow idiomatic Go practices and community standards when writing Go code. Thes
 
 ## Testing
 
-### Test Organization
-
-- Keep tests in the same package (white-box testing)
-- Use `_test` package suffix for black-box testing
-- Name test files with `_test.go` suffix
-- Place test files next to the code they test
-
-### Writing Tests
-
-- Use table-driven tests for multiple test cases
-- Name tests descriptively using `Test_functionName_scenario`
-- Use subtests with `t.Run` for better organization
-- Test both success and error cases
-- Consider using `testify` or similar libraries when they add value, but don't over-complicate simple tests
-
-### Test Helpers
-
-- Mark helper functions with `t.Helper()`
-- Create test fixtures for complex setup
-- Use `testing.TB` interface for functions used in tests and benchmarks
-- Clean up resources using `t.Cleanup()`
+See `go-testing.instructions.md` for assertions (testify is mandatory),
+executable examples, test organization, and the full Test Desiderata 2.0
+conventions.
 
 ## Security Best Practices
 
@@ -369,6 +343,6 @@ Follow idiomatic Go practices and community standards when writing Go code. Thes
 - Not understanding nil interfaces vs nil pointers
 - Forgetting to close resources (files, connections)
 - Using global variables unnecessarily
-- Overusing unconstrained types (e.g., `any`); prefer specific types or generic type parameters with constraints. If an unconstrained type is required, use `any` rather than `interface{}`
+- Overusing unconstrained types (`any`) instead of specific types or generic type parameters with constraints
 - Not considering the zero value of types
-- **Creating duplicate `package` declarations** - this is a compile error; always check existing files before adding package declarations
+- Duplicate `package` declarations in one file (compile error — see Package Declaration Rules above)
