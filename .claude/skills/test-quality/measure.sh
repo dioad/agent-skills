@@ -96,7 +96,7 @@ fi
 python3 "$HERE/test_quality.py" --module "$MODULE" --scope "$SCOPE" \
   findings --mutation "$OUT/mutation-report.json" \
   --covdir "$OUT/per-test" --gocognit "$OUT/gocognit.jsonl" \
-  "${CONTRIB_ARG[@]}" --out doc/test-quality-findings.md
+  ${CONTRIB_ARG[@]+"${CONTRIB_ARG[@]}"} --out doc/test-quality-findings.md
 
 echo
 echo "scorecard : $OUT/scorecard.md"
