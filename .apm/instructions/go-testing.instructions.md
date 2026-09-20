@@ -48,6 +48,63 @@ func ExampleGreet() {
 
 Do not write example code in comments, README snippets, or prose without a corresponding runnable `func Example...` counterpart in a `_test.go` file.
 
+## Adapter/Port Conformance Suites
+
+When a domain port (an interface — a registry, a repository, a store) has
+more than one implementation (an in-memory adapter for tests plus a SQL or
+other persistent adapter for production, say), write **one** shared,
+table-driven test suite that asserts the port's actual contract, and run it
+unmodified against every adapter:
+
+```go
+// runRegistryContractTests verifies the behavioural contract of any
+// implementation of Registry. Pass a factory that returns a fresh, empty
+// instance for each sub-test.
+func runRegistryContractTests(t *testing.T, newRegistry func() Registry) {
+    t.Helper()
+    // ... shared sub-tests: Add, Remove, each filterable search field,
+    // not-found semantics, ordering where the interface promises it,
+    // idempotency of Upsert under redelivery, concurrent same-identity
+    // writes under -race ...
+}
+
+func TestInMemoryRegistry(t *testing.T) {
+    runRegistryContractTests(t, func() Registry { return NewInMemoryRegistry() })
+}
+
+func TestSQLRegistry(t *testing.T) {
+    runRegistryContractTests(t, func() Registry { return newTestSQLRegistry(t) })
+}
+```
+
+Testing only the in-memory adapter directly (the common shortcut, since it
+needs no database) lets the adapters silently diverge: a filter field, an
+ordering guarantee, or an idempotency contract that one adapter honours and
+the other doesn't will pass every existing test in both directions, because
+nothing ever exercises both adapters against the same expectation. This is
+not hypothetical — it is the specific bug class a missing case in a shared
+suite has been observed to hide until traced back from production behaviour.
+
+The contract-test table is only as strong as its coverage of the port's
+actual parameters: when a new filterable field, search option, or search-vs-write
+behaviour is added to the port, add its case to the shared table in the same
+change, not to a docstring or a single adapter's own test file. A port whose
+interface makes no promise (no ordering guarantee documented, no uniqueness
+implied) should not be tested for a property it never promised — asserting
+that would make the suite pass now and break the next time an adapter is
+legitimately reimplemented without changing behaviour anyone (i.e. no
+caller) relies on.
+
+Where a write path is driven by an at-least-once source (an event stream
+with replay-on-reconnect, a webhook that can be redelivered), the same
+contract suite should assert idempotency directly: apply the identical write
+twice and assert exactly one resulting row/record, run under `-race`
+alongside a concurrent write of the same identity. A check-then-write that
+isn't wrapped in a transaction (or otherwise made atomic) will pass a
+single-threaded test and duplicate rows or corrupt state only under the
+concurrent, redelivered traffic the contract suite's `-race` case is
+specifically there to catch.
+
 ## Test Desiderata 2.0
 
 Write tests that satisfy the properties from [Test Desiderata 2.0](https://coding-is-like-cooking.info/2025/12/test-desiderata-2-0/). These are grouped by the outcome they support.

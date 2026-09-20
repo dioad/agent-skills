@@ -193,6 +193,48 @@ Follow idiomatic Go practices and community standards when writing Go code. Thes
 - Handle errors at the appropriate level
 - Consider using structured errors for better debugging
 
+### Error → HTTP Status Mapping
+
+For an HTTP service, maintain exactly **one** service-error-to-HTTP mapping
+function per service, and route every handler through it (or through a
+shared status-lookup helper it's built on):
+
+```go
+// ServiceErrorHTTPStatus maps a service-layer error to an HTTP status code.
+// Returns (0, "") for errors that match no sentinel, leaving the caller to
+// decide on a default (typically 500).
+func ServiceErrorHTTPStatus(err error) (int, string) {
+    switch {
+    case errors.Is(err, service.ErrForbidden):
+        return http.StatusForbidden, "forbidden"
+    case errors.Is(err, service.ErrUnauthorized):
+        return http.StatusUnauthorized, "unauthorized"
+    case errors.Is(err, service.ErrNotFound):
+        return http.StatusNotFound, "not found"
+    case errors.Is(err, service.ErrInvalidInput):
+        return http.StatusBadRequest, "invalid request"
+    default:
+        return 0, ""
+    }
+}
+```
+
+Two or more independent mapping functions in the same service (one per
+resource package, one hand-rolled alongside a shared helper used everywhere
+else) reliably diverge over time: a sentinel added to the service's
+vocabulary gets wired into one mapper and forgotten in the others, and the
+same logical error returns a different status code depending on which route
+handled the request.
+
+Every sentinel a service-layer function can return must wrap that package's
+own base sentinel via `%w` (`fmt.Errorf("...: %w", ErrNotFound)`, or declare
+it as `errors.New(...)` directly if it *is* the base sentinel) so
+`errors.Is(err, ErrNotFound)` succeeds for every concrete not-found error the
+package produces, not only a single hand-picked one. A bare
+`errors.New("thing not found")` that doesn't wrap the package's `ErrNotFound`
+will silently map to 500 instead of 404 the moment it reaches the shared
+mapper, with no compiler error to catch the omission.
+
 ## API Design
 
 ### HTTP Handlers
