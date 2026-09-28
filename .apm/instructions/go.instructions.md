@@ -256,6 +256,40 @@ mapper, with no compiler error to catch the omission.
 - Consider using `json.RawMessage` for delayed parsing
 - Handle JSON errors appropriately
 
+### JSON Tags Can Be an Implicit, Versionless Storage Schema
+
+Some dioad services persist Go structs directly through a JSON-document layer over SQL
+(e.g. `github.com/dioad/nosqlite`, which stores each row as one `data jsonb` column via
+plain `encoding/json.Marshal`/`Unmarshal`, and filters rows with JSONPath clauses such as
+`nosqlite.Equal("$.FieldName", ...)`). When a struct's `json` tags double as both the HTTP
+API's wire format and that storage layer's on-disk schema, **renaming, adding, or removing
+a tag is a database migration, not a refactor.** There is no case-insensitive or
+underscore-insensitive fallback on read: a tag change silently zero-values every field on
+every row written before it, and JSONPath filters stop matching those rows too — with no
+error raised anywhere.
+
+- Before changing any `json` tag, check whether that exact type — not just a same-shaped
+  one — is passed directly into a persistence layer's marshal/unmarshal path: grep for
+  `nosqlite.Table[*YourType]`, `nosqlite.NewTable[*YourType]`, or any other
+  `json.Marshal(yourType)` write into a database, cache, or file.
+- If it is, and the API-facing shape still needs to change, split the type: keep a frozen,
+  storage-only record — its own struct, its own field names, typically the type's
+  *original* tags left exactly as they were — for the persistence layer, and convert to/from
+  the public API type at the registry boundary. `tunnelRecord` /
+  `tunnelToRecord` / `recordToTunnel` in `connect-control`'s
+  `internal/cmd/agentregistry/service/tunnel_registry_sql.go` is the reference
+  implementation of this pattern; `endpointRecord` in the sibling
+  `endpoint_registry_sql.go` is the same pattern applied retroactively, after skipping it
+  once already broke every existing `agentregistry.db` on disk.
+- Any JSONPath query clauses and index definitions built against the type (`$.Field` in
+  `nosqlite.Equal`/`In`/`ContainsAll`/etc., `CreateIndex` field lists) must stay pinned to
+  the storage record's field names, not the API type's tags. When retrofitting the split
+  onto an existing table, fix the query clauses to match the record (which keeps the
+  original, unchanged names) — do not "fix" them to the new API tags.
+- Write a test that marshals the storage record directly and asserts its exact JSON keys.
+  That pins the on-disk shape so a future API-tag change on the public type fails loudly in
+  CI instead of silently corrupting reads against production data.
+
 ### HTTP Clients
 
 - Keep the client struct focused on configuration and dependencies only (e.g., base URL, `*http.Client`, auth, default headers). It must not store any per-request state
