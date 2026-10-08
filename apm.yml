@@ -14,7 +14,6 @@ targets:
 dependencies:
   apm:
   - git: wondelai/skills
-    skills: ["*"]
   mcp: []
 includes: auto
 scripts:
