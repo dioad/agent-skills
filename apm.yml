@@ -13,7 +13,7 @@ targets:
 - copilot
 dependencies:
   apm:
-  - git: wondelai/skills
+  - dioad/wondelai-skills@feat/support-apm
   mcp: []
 includes: auto
 scripts:
