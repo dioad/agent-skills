@@ -12,8 +12,8 @@ targets:
 - claude
 - copilot
 dependencies:
-  apm:
-  - dioad/wondelai-skills#feat/support-apm
+  apm: []
+  #  - dioad/wondelai-skills#feat/support-apm
   mcp: []
 includes: auto
 scripts:

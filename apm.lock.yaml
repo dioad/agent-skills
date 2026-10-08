@@ -1,4 +1,71 @@
 lockfile_version: '1'
-generated_at: '2026-09-10T19:02:38.236003+00:00'
+generated_at: '2026-10-08T19:41:18.403883+00:00'
 apm_version: 0.18.0
-dependencies: []
+dependencies:
+- repo_url: wondelai/skills
+  host: github.com
+  resolved_commit: c172996495bed0fcd26896a9416b2093fd7073f0
+  package_type: marketplace_plugin
+  content_hash: sha256:1bdcdec6665dee9d4a9f89405a0f53a050374e08302f339cd5833dea29c1a099
+  skill_subset:
+  - '*'
+local_deployed_files:
+- .agents/skills/architecture-review
+- .agents/skills/beta-release-readiness
+- .agents/skills/test-quality
+- .claude/commands/architecture-review.md
+- .claude/commands/beta-release-readiness.md
+- .claude/commands/test-quality.md
+- .claude/rules/cross-repo-workflow.md
+- .claude/rules/git-workflow.md
+- .claude/rules/go-testing.md
+- .claude/rules/go.md
+- .claude/rules/phased-refactor.md
+- .claude/rules/playwright-typescript.md
+- .claude/rules/project-checks.md
+- .claude/rules/service-composition.md
+- .claude/rules/shared-library-extraction.md
+- .claude/rules/zerolog.md
+- .claude/skills/architecture-review
+- .claude/skills/beta-release-readiness
+- .claude/skills/test-quality
+- .github/instructions/cross-repo-workflow.instructions.md
+- .github/instructions/git-workflow.instructions.md
+- .github/instructions/go-testing.instructions.md
+- .github/instructions/go.instructions.md
+- .github/instructions/phased-refactor.instructions.md
+- .github/instructions/playwright-typescript.instructions.md
+- .github/instructions/project-checks.instructions.md
+- .github/instructions/service-composition.instructions.md
+- .github/instructions/shared-library-extraction.instructions.md
+- .github/instructions/zerolog.instructions.md
+- .github/prompts/architecture-review.prompt.md
+- .github/prompts/beta-release-readiness.prompt.md
+- .github/prompts/test-quality.prompt.md
+local_deployed_file_hashes:
+  .claude/commands/architecture-review.md: sha256:c37b3ba1098ce7efc2c574b6cfa23ef600482c80f4dc2d1e16fa4700bbea8cd2
+  .claude/commands/beta-release-readiness.md: sha256:26c1d5bd6e52a379372399fde435d2200ee71047e4268cb39a126e6ffae50bd2
+  .claude/commands/test-quality.md: sha256:3346f705ed4d6f056151795a1ad255eac75ff3b9eda25bfb8b3bc0313aa43434
+  .claude/rules/cross-repo-workflow.md: sha256:a63b5a4b2485f94f421ac563a00a8c580b8456a6124fa15835d49dc63a6c5b80
+  .claude/rules/git-workflow.md: sha256:cf2a0060403efc62fcc8d1f76de8d478fcd705db2a75c7293c8050ec5a6aeb1c
+  .claude/rules/go-testing.md: sha256:d34785b5f5fe68081123da84eabc63573efc60c014781e7e8496faab44f8d9a3
+  .claude/rules/go.md: sha256:45db2c042108a104930bc33980745b0b861cff426073dd679c40032083d53508
+  .claude/rules/phased-refactor.md: sha256:5c0d9392c279dada29842b6cd23da518b65fec293ab6a12cc2282c8c2155feff
+  .claude/rules/playwright-typescript.md: sha256:f51d34d02282ccf49f9a252a8631b6b7edde4437d72b7384cdbf1122e5180714
+  .claude/rules/project-checks.md: sha256:3f9f0156674e13ff5d5234ada7bb376c54ed90174754ced4a17a0ae227efd0c1
+  .claude/rules/service-composition.md: sha256:325d0837d5b936b0fb63dfeae4a71770b258480a6da0daa9900a77b061149076
+  .claude/rules/shared-library-extraction.md: sha256:5b5004f79046bf3ac226bdd45e6d33243eb85ebb950678dbf23b32c4e422c00f
+  .claude/rules/zerolog.md: sha256:52e64bf7823e795f6ba18e24f4330e088580f7d94aaefab744b0e6e3d2f1cff9
+  .github/instructions/cross-repo-workflow.instructions.md: sha256:7b837ac6ff70d29c799e0bcbbdeeebe43b23fc3e3d9048c69691e69d3ca43a8e
+  .github/instructions/git-workflow.instructions.md: sha256:2c1963acb9acd466e4c0621e7d5fefb5ef81891d84212c1b8542e173e74b767f
+  .github/instructions/go-testing.instructions.md: sha256:e7853770d889ebfa194fe69bc7687e4d5a4912b97be11198ce175f2c89a1fd1e
+  .github/instructions/go.instructions.md: sha256:4ec6167e0e8c05e96ce359623b185f5af58dc6517fa68c4e6b15aea6eea3185b
+  .github/instructions/phased-refactor.instructions.md: sha256:35afe2c7967168123eeb67d068c08b40df181e877ca67d43f2f87c50bcbbdadf
+  .github/instructions/playwright-typescript.instructions.md: sha256:bf42d14519531fddc310b2e786982d3d669d8d1618acc1a1a4b833013fff06f1
+  .github/instructions/project-checks.instructions.md: sha256:8e2c758db2925b4d35b93ff1882d77307052ea0dd3d8853a68ad0145806eef44
+  .github/instructions/service-composition.instructions.md: sha256:cc101b44ec38b07b18b99684558198a057de9f7044e96181a229bba57b2603cc
+  .github/instructions/shared-library-extraction.instructions.md: sha256:9d4f2685642aa1cb49e8a8aa68fbf463e86ff9e30a4393218917a564481412aa
+  .github/instructions/zerolog.instructions.md: sha256:754e224c531d4128e939cd3d790354df55b9c4d58d7adfb64a4ad4b081b83d6d
+  .github/prompts/architecture-review.prompt.md: sha256:0d6ce95982e6e71247d032009c5704bc4e16e7df317e4c3b33ab41025f10f802
+  .github/prompts/beta-release-readiness.prompt.md: sha256:786831e0cfcfd7011a3cb706192fe977272e580d65414b30e9c5082c64ea1a7c
+  .github/prompts/test-quality.prompt.md: sha256:781af13356e0c7b336a8bc6c306a5bf6fa8059e66a07bb4daa524e60a3f15637
