@@ -19,28 +19,30 @@ The choice of where a logger lives determines how log events are correlated:
 
 Never store a `zerolog.Logger` on a struct that handles `net/http` requests just to avoid writing `zerolog.Ctx(r.Context())`. The stored logger will not carry dynamic request fields, and those fields will be silently absent from every log event.
 
-## Application Startup: DefaultContextLogger and Root Context Injection
+## Application Startup: Label the Root Context with ServiceLogger
 
-At the application entry point (`Exec` / `main`), do two things after configuring `log.Logger`:
-
-1. **Set `zerolog.DefaultContextLogger`** to the enriched logger so that `zerolog.Ctx` works correctly on *any* context — including shutdown contexts derived from `context.Background()`.
-2. **Inject the same logger into the root context** so all child contexts inherit the enrichment automatically.
-
-Both must use the **same enriched logger**. Splitting them — setting `DefaultContextLogger` to the raw `log.Logger` while injecting an enriched version into `ctx` — means fallback-context paths (e.g. shutdown, periodic cleanup) log without the service label.
+At the application entry point (`Build` / `Exec` / `main`), after `log.Logger` is configured, label the root context once with `cli.ServiceLogger` (from `github.com/dioad/cli`) and pass that context down:
 
 ```go
-// Correct — single enriched logger for both mechanisms
-serviceLogger := log.Logger.With().Str("service", "my-service").Logger()
-zerolog.DefaultContextLogger = &serviceLogger
-ctx = serviceLogger.WithContext(ctx)
-
-// Wrong — DefaultContextLogger lacks the service field
-log.Logger = ...  // configured by CLI
-zerolog.DefaultContextLogger = &log.Logger        // no service field
-ctx = log.Logger.With().Str("service", "x").Logger().WithContext(ctx)  // enriched ctx only
+// Correct — the service label is on the context; no global is written
+ctx = cli.ServiceLogger(ctx, "my-service")
+logger := *zerolog.Ctx(ctx)
 ```
 
-With `DefaultContextLogger` set, `zerolog.Ctx(ctx)` is safe to use everywhere: it returns the configured logger even for contexts that have no embedded logger, making `log.*` calls unnecessary outside of program initialisation.
+`ServiceLogger` enriches the logger already in `ctx` (or the process logger if there is none) with `service=<name>` and returns a context carrying it. It does **not** set `zerolog.DefaultContextLogger` or any other zerolog global, so several services can run in one process (for example a combined binary, or tests) and each label itself without racing over shared state. Do not write `zerolog.DefaultContextLogger` from a service.
+
+Every context derived from the root inherits the label, including `WithCancel`, `WithTimeout` and `WithValue` contexts. A **shutdown path must derive its context with `context.WithoutCancel(ctx)`, not `context.Background()`**: `Background()` carries no logger, so `zerolog.Ctx` returns a disabled logger and the shutdown events are silently dropped.
+
+```go
+// Correct — keeps the logger and the service label, drops the cancellation
+shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), stopTimeout)
+defer cancel()
+
+// Wrong — no logger in a Background context; shutdown events are lost
+shutdownCtx, cancel := context.WithTimeout(context.Background(), stopTimeout)
+```
+
+Pass the labelled logger to constructors that hold one for their lifetime (`logger := *zerolog.Ctx(ctx)`), and build test doubles with `zerolog.Nop()`.
 
 ## Component Context Enrichment
 
@@ -144,7 +146,7 @@ func (m *Manager) CreateSubscription(ctx context.Context, ...) (*Subscription, e
 
 **Background goroutines and lifecycle methods:** Functions that run outside the HTTP request lifetime (worker goroutines, shutdown handlers, pubsub bridge routines, periodic cleanup) use `zerolog.Ctx(ctx)` just like any other code. Their context is a process/manager context that carries component-level enrichment (e.g. `component=webhook`) but not request-scoped fields — which is correct, since those fields have no meaning outside a request.
 
-With `zerolog.DefaultContextLogger` set at startup (see "Application Startup" section), `zerolog.Ctx(ctx)` is always safe to call even if the context has no embedded logger; the fallback returns the configured application logger. The global `log.*` package is therefore only needed before the application context is initialised (i.e. in `main` / `init`).
+Derive these contexts from the labelled root context (see "Application Startup"), using `context.WithoutCancel` where the work must outlive cancellation, so `zerolog.Ctx(ctx)` carries the service label. A context built from `context.Background()` has no logger. The global `log.*` package is only needed before the application context is initialised (i.e. in `main` / `init`).
 
 ```go
 // Correct — background worker uses context logger; inherits component=webhook
@@ -163,8 +165,8 @@ func (m *Manager) worker(ctx context.Context, id int) {
     }
 }
 
-// Correct — lifecycle method uses context logger; DefaultContextLogger provides
-// the configured logger when ctx is a fresh shutdown context.
+// Correct — lifecycle method uses context logger; the caller derives ctx from
+// the labelled root with context.WithoutCancel, so it keeps the service label.
 func (m *Manager) Shutdown(ctx context.Context) error {
     zerolog.Ctx(ctx).Info().Msg("Shutting down webhook manager")
     ...
@@ -320,7 +322,7 @@ Use these names consistently across all codebases:
 
 | Field | Type | Set by | Meaning |
 |-------|------|--------|---------|
-| `service` | `string` | Application entry point (`Exec`) | Process-wide label identifying the service (e.g. `api`, `billing`). Set once via `DefaultContextLogger` and root context injection so every log event carries it. |
+| `service` | `string` | Application entry point (`Exec`) | Process-wide label identifying the service (e.g. `api`, `billing`). Set once on the root context with `cli.ServiceLogger` so every log event carries it. |
 | `component` | `string` | Component constructor (e.g. `NewManager`) | Subsystem label injected into a long-lived sub-context (e.g. `webhook`, `sse`, `cors`). Inherited by all goroutines spawned from that context. |
 | `request_id` | `string` | Request-ID middleware | Unique ID per HTTP request |
 | `auth_source` | `string` | Auth middleware | Which auth mechanism validated the request (`oidc_session`, `jwt`, `basic`, `github`, `hmac`) |
@@ -415,7 +417,8 @@ req = req.WithContext(ctx)
 | `logger zerolog.Logger` field on an HTTP handler struct | `zerolog.Ctx(r.Context())` in the handler body |
 | Passing `zerolog.Logger` as an argument to handler constructors | Remove the parameter; read from context at call time |
 | Using `log.Logger` (package-level) inside a handler or service function that accepts `context.Context` | `zerolog.Ctx(ctx)` — preserves request-scoped fields across the call stack |
-| Setting `zerolog.DefaultContextLogger` to the raw `log.Logger` while injecting an enriched logger into `ctx` | Use the same enriched logger for both — split enrichment means fallback-context paths (shutdown, cleanup) log without the service label |
+| Writing `zerolog.DefaultContextLogger` from a service | Label the root context with `cli.ServiceLogger`; the global is process-wide, so two services in one process race over it |
+| Building a shutdown or cleanup context from `context.Background()` | `context.WithoutCancel(ctx)` — keeps the logger and the service label, drops the cancellation |
 | Building the logger from the caller's request context in a function whose goroutine runs under a different (component) context | Resolve the authoritative context first, then build one logger from it and share it across guard checks and the goroutine |
 | Passing the server/broker context to an HTTP response-writer goroutine | Pass `req.Context()` — write errors are per-request events and should carry request-scoped fields |
 | Not enriching a component's sub-context with a `component` label before spawning workers | Call `zerolog.Ctx(ctx).With().Str("component", "name").Logger().WithContext(ctx)` immediately after `context.WithCancel` |

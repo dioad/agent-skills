@@ -12,10 +12,9 @@ for health/metrics/debug). They converged independently across several
 services reviewed in isolation, which is the signal that they are conventions
 rather than one project's taste.
 
-See `zerolog.instructions.md` ("Application Startup") for
-`zerolog.DefaultContextLogger` and root-context logger injection — that
-happens inside `Build`, alongside the wiring below, but is documented there
-in full and is not repeated here.
+See `zerolog.instructions.md` ("Application Startup") for labelling the root
+context with `cli.ServiceLogger` — that happens inside `Build`, alongside the
+wiring below, but is documented there in full and is not repeated here.
 
 ## Split `Build` from `Run`
 
